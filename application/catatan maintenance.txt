@@ -1,0 +1,74 @@
+1) tambahkan folder "pengendalian" di setiap folder si_imut\file\tahunPelaksanaan\xxx
+2) 
+INSERT INTO `tjenisevent` (`ID`,`jenisEvent`) VALUES
+ (55,'Upload file pengendalian'),
+ (56,'Delete file pengendalian'),
+ (57,'Create Users Dosen'),
+ (58,'Update Users Dosen'),
+ (59,'Delete Users Dosen'),
+ (60,'Ganti Password Users Dosen'),
+ (61,'Create Dokumen Dosen'),
+ (62,'Update Dokumen Dosen'),
+ (63,'Delete Dokumen Dosen'),
+ (64,'Upload file dokumen dosen'),
+ (65,'Delete file dokumen dosen'),
+;
+
+ALTER TABLE `siimut`.`tdetailevaluasi` ADD COLUMN `dokumen` VARCHAR(200) AFTER `tindakLanjutProdi`;
+
+ALTER TABLE `siimut`.`tuser` MODIFY COLUMN `level` ENUM('superadmin','admin','prodi','pimpinan','auditor', 'dosen') NOT NULL DEFAULT 'prodi';
+ALTER TABLE `siimut`.`tmenu` MODIFY COLUMN `level` ENUM('superadmin','admin','prodi','pimpinan','auditor', 'dosen') NOT NULL DEFAULT 'admin';
+
+INSERT INTO `tmenu` VALUES
+(100,'Master Data Prodi', '#', 'fa fa-file', 0, 'prodi', 1),
+(101,'User Dosen', '/UsersProdi', 'fa fa-user', 100, 'prodi', 1),
+(50,'Menu Utama Dosen', '#', 'fa fa-home', 0, 'dosen', 1),
+(51,'Panduan', '/Panduan', 'fa fa-file-o', 50, 'dosen', 1),
+-- (52,'Penetapan', '/Penetapan', 'fa fa-book', 50, 'dosen', 1),
+-- (53,'Data Pelaksanaan', '/DataPelaksanaan', 'fa fa-arrows-alt', 50, 'dosen', 1),
+-- (54,'Evaluasi', '/Evaluasi', 'fa fa-list-ol', 50, 'dosen', 1),
+-- (55,'Pengendalian', '/Pengendalian', 'fa fa-circle-o', 50, 'dosen', 1),
+-- (56,'Data Peningkatan', '/DataPeningkatan', 'fa fa-signal', 50, 'dosen', 1),
+(57,'Input Dokumen Dosen', '/InputDokumenLainDosen', 'fa fa-file-text', 50, 'dosen', 1),
+(502,'Data Menu', '/SuperAdmin/menu', 'fa fa-bars', 0, 'superadmin', 1),
+(38,'Dokumen Dosen', '/DataDokumenLainDosenAdmin', 'fa fa-file-text', 9, 'admin', 1),
+(39,'Dokumen Dosen', '/DataDokumenLainDosen', 'fa fa-file-text', 16, 'auditor', 1),
+(40,'Dokumen Dosen', '/DataDokumenLainDosen', 'fa fa-file-text', 30, 'pimpinan', 1),
+(125,'Dokumen Dosen', '/DataDokumenLainDosenProdi', 'fa fa-file-text', 111, 'prodi', 1)
+
+
+CREATE TABLE `siimut`.`tjenisdokumenlain` (
+  `ID` SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nama` VARCHAR(200) NOT NULL,
+  `log` TIMESTAMP NOT NULL,
+  PRIMARY KEY (`ID`)
+)
+ENGINE = InnoDB;
+
+INSERT INTO `tjenisdokumenlain` (`ID`,`nama`,`log`) VALUES 
+ (1,'Pendidikan dan Pengajaran',now()),
+ (2,'Penelitian',now()),
+ (3,'Pengabdian Masyarakat',now()),
+ (4,'Penunjang Lainnya',now());
+
+DROP TABLE IF EXISTS `tdetaildokumenlaindosen`;
+CREATE TABLE `tdetaildokumenlaindosen` (
+  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `idUser` int(10) unsigned NOT NULL,
+  `idUserDosen` int(10) unsigned NOT NULL,
+  `idJenisDokumenLain` smallint(5) unsigned NOT NULL,
+  `idTahunPelaksanaan` smallint(5) unsigned NOT NULL,
+  `kode` varchar(20) NOT NULL,
+  `nama` varchar(500) NOT NULL,
+  `dokumen` varchar(200) NOT NULL,
+  `log` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ID`),
+  KEY `FK_tdetaildokumenlaindosen_tuser` (`idUser`),
+  KEY `FK_tdetaildokumenlaindosen_tuserdosen` (`idUserDosen`),
+  KEY `FK_tdetaildokumenlaindosen_tjenisdokumenlain` (`idJenisDokumenLain`),
+  KEY `FK_tdetaildokumenlaindosen_ttahunpelaksanaan` (`idTahunPelaksanaan`),
+  CONSTRAINT `FK_tdetaildokumenlaindosen_tjenisdokumenlain` FOREIGN KEY (`idJenisDokumenLain`) REFERENCES `tjenisdokumenlain` (`ID`),
+  CONSTRAINT `FK_tdetaildokumenlaindosen_ttahunpelaksanaan` FOREIGN KEY (`idTahunPelaksanaan`) REFERENCES `ttahunpelaksanaan` (`ID`),
+  CONSTRAINT `FK_tdetaildokumenlaindosen_tuser` FOREIGN KEY (`idUser`) REFERENCES `tuser` (`ID`),
+  CONSTRAINT `FK_tdetaildokumenlaindosen_tuserdosen` FOREIGN KEY (`idUserDosen`) REFERENCES `tuser` (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
